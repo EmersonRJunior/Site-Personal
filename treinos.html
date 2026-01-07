@@ -3,95 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Montagem de Treinos</title>
+    <title>Gerenciador de Treinos - RecuperaÃ§Ã£o & Hipertrofia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .card-enter { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; }
+        #modal-montar, #modal-dia { z-index: 9999; }
+        
+        /* Ajuste para o Bug Visual da DescriÃ§Ã£o */
+        .notes-area { 
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+            overflow-wrap: break-word;
+            max-width: 100%;
         }
-        .card-enter {
-            animation: slideIn 0.3s ease-out;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        #modal { z-index: 9999; }
     </style>
 </head>
 <body class="p-4 md:p-8">
     <div id="app" class="max-w-4xl mx-auto">
-        <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-slate-800">Fila de Treinos</h1>
-                <p class="text-slate-500">Gestão de Recuperação & Hipertrofia</p>
-                <div id="connStatus" class="text-xs font-mono mt-1 px-2 py-1 rounded bg-slate-100 inline-block">Conectando...</div>
+        <!-- CabeÃ§alho -->
+        <header class="mb-8 border-b border-slate-200">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-800">Sistema de Treinos</h1>
+                    <div id="connStatus" class="text-[10px] font-mono mt-1 px-2 py-0.5 rounded bg-slate-100 inline-block uppercase tracking-wider text-slate-500">Conectando...</div>
+                </div>
             </div>
-            <button id="btnOpenModal" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-all shadow-lg flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Novo Aluno
-            </button>
+            <nav class="flex gap-8">
+                <button onclick="switchTab('montar')" id="tab-montar" class="pb-3 font-semibold text-slate-500 hover:text-slate-700 transition-all tab-active">Treinos a Montar</button>
+                <button onclick="switchTab('dia')" id="tab-dia" class="pb-3 font-semibold text-slate-500 hover:text-slate-700 transition-all">Treino do Dia</button>
+            </nav>
         </header>
 
-        <div id="stats" class="mb-8">
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm inline-block min-w-[200px]">
-                <span class="text-slate-500 text-sm">Alunos em Espera</span>
-                <p id="countPending" class="text-2xl font-bold text-blue-600">0</p>
-            </div>
-        </div>
-
-        <div id="studentList" class="grid grid-cols-1 gap-4"></div>
-
-        <div id="emptyState" class="hidden text-center py-20">
-            <p class="text-slate-500">Tudo em dia! Nenhum treino pendente.</p>
-        </div>
-    </div>
-
-    <!-- Modal Form -->
-    <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                <h2 id="modalTitle" class="text-xl font-bold text-slate-800">Adicionar Aluno</h2>
-                <button id="btnCloseModal" class="text-slate-400 hover:text-slate-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <!-- ABA 1: TREINOS A MONTAR -->
+        <main id="content-montar">
+            <div class="flex justify-between items-center mb-6">
+                <div class="bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                    <span class="text-slate-500 text-xs uppercase font-bold">Fila de Espera:</span>
+                    <span id="countPending" class="text-xl font-bold text-blue-600 ml-2">0</span>
+                </div>
+                <button onclick="openModal('montar')" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-semibold shadow flex items-center gap-2 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Novo Aluno
                 </button>
             </div>
-            <form id="studentForm" class="p-6 space-y-4">
-                <input type="hidden" id="editId">
+            <div id="studentList" class="grid grid-cols-1 gap-4"></div>
+            <div id="emptyStateMontar" class="hidden text-center py-20 text-slate-400">Nenhum aluno aguardando montagem.</div>
+        </main>
+
+        <!-- ABA 2: TREINO DO DIA -->
+        <main id="content-dia" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-lg font-semibold text-slate-700">PrescriÃ§Ã£o da SessÃ£o</h2>
+                <button onclick="openModal('dia')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg font-semibold shadow flex items-center gap-2 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Novo Aluno
+                </button>
+            </div>
+            <div id="dailyList" class="grid grid-cols-1 gap-4"></div>
+            <div id="emptyStateDia" class="hidden text-center py-20 text-slate-400">Nenhum treino prescrito para hoje.</div>
+        </main>
+    </div>
+
+    <!-- MODAL: ABA 1 -->
+    <div id="modal-montar" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden card-enter">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-slate-800">Fila de Montagem</h2>
+                <button onclick="closeModal('montar')" class="text-slate-400 hover:text-slate-600">âœ•</button>
+            </div>
+            <form id="form-montar" class="p-6 space-y-4">
+                <input type="hidden" id="editId-montar">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Nome do Aluno</label>
-                    <input type="text" id="name" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="text" id="name-montar" required class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Academia</label>
-                        <input type="text" id="gym" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <input type="text" id="gym-montar" required class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Nº Matrícula</label>
-                        <input type="text" id="enrollment" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">MatrÃ­cula</label>
+                        <input type="text" id="enrollment-montar" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Observações Clínicas/Treino</label>
-                    <textarea id="observations" rows="3" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ex: Pós-cirúrgico LCA, foco em estabilização..."></textarea>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Obs. ClÃ­nicas</label>
+                    <textarea id="obs-montar" rows="3" class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
-                <button type="submit" id="btnSave" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors">
-                    Gravar na Nuvem
-                </button>
+                <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors">Adicionar Ã  Fila</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ABA 2 -->
+    <div id="modal-dia" class="fixed inset-0 bg-black/50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden card-enter">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-slate-800">Prescrever Treino</h2>
+                <button onclick="closeModal('dia')" class="text-slate-400 hover:text-slate-600">âœ•</button>
+            </div>
+            <form id="form-dia" class="p-6 space-y-4">
+                <input type="hidden" id="editId-dia">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Aluno</label>
+                        <input type="text" id="name-dia" required class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Grupo Muscular</label>
+                        <input type="text" id="muscle-dia" required class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">DescriÃ§Ã£o / Notas</label>
+                    <textarea id="notes-dia" rows="10" required class="w-full border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500" placeholder="ExercÃ­cios e sÃ©ries..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-lg hover:bg-emerald-700 transition-colors">Salvar Treino</button>
             </form>
         </div>
     </div>
 
     <script type="module">
-        // Imports atualizados para a versão 11.10.2 (Estável)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
         import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-        // Sua configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDa-kFAP_jyErQVBeouZXppWEBVlE6SluI",
             authDomain: "montadordetreinos.firebaseapp.com",
@@ -102,147 +143,149 @@
             measurementId: "G-GK8ZDD5SE1"
         };
 
-        // Inicialização
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        
-        // ID para organizar os dados no Firestore
         const appId = "gerenciador-treinos-v1";
 
         let currentUser = null;
         let students = [];
+        let dailyWorkouts = [];
 
-        // Escuta o estado da autenticação
+        window.switchTab = (tab) => {
+            document.getElementById('content-montar').classList.toggle('hidden', tab !== 'montar');
+            document.getElementById('content-dia').classList.toggle('hidden', tab !== 'dia');
+            document.getElementById('tab-montar').classList.toggle('tab-active', tab === 'montar');
+            document.getElementById('tab-dia').classList.toggle('tab-active', tab === 'dia');
+        };
+
+        window.openModal = (type) => {
+            document.getElementById(`form-${type}`).reset();
+            document.getElementById(`editId-${type}`).value = '';
+            document.getElementById(`modal-${type}`).classList.replace('hidden', 'flex');
+        };
+        window.closeModal = (type) => document.getElementById(`modal-${type}`).classList.replace('flex', 'hidden');
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUser = user;
                 document.getElementById('connStatus').innerText = "Nuvem Ativa";
-                document.getElementById('connStatus').className = "text-xs font-mono mt-1 px-2 py-1 rounded bg-green-100 text-green-700 inline-block";
-                setupDataListener(user.uid);
+                document.getElementById('connStatus').className = "text-[10px] font-mono mt-1 px-2 py-0.5 rounded bg-green-100 text-green-700 inline-block uppercase tracking-wider";
+                setupListeners(user.uid);
             } else {
-                // Tenta logar anonimamente se não houver usuário
-                signInAnonymously(auth).catch(err => {
-                    console.error("Erro auth:", err);
-                    document.getElementById('connStatus').innerText = "Erro de Acesso";
-                    document.getElementById('connStatus').className = "text-xs font-mono mt-1 px-2 py-1 rounded bg-red-100 text-red-700 inline-block";
-                });
+                signInAnonymously(auth);
             }
         });
 
-        // Escuta os dados em tempo real
-        function setupDataListener(userId) {
-            const colRef = collection(db, 'artifacts', appId, 'users', userId, 'students');
-            onSnapshot(colRef, (snapshot) => {
-                students = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                render();
-            }, (err) => {
-                console.error("Erro Firestore:", err);
-                if(err.code === 'permission-denied') {
-                    console.error("Acesso Negado. Verifique as Regras de Segurança.");
-                }
+        function setupListeners(userId) {
+            onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'students'), (snap) => {
+                students = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderMontar();
+            });
+            onSnapshot(collection(db, 'artifacts', appId, 'users', userId, 'daily_workouts'), (snap) => {
+                dailyWorkouts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderDia();
             });
         }
 
-        // Funções Globais para interagir com o Banco
-        window.saveStudent = async (data) => {
-            if (!currentUser) return;
-            const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'students');
-            try {
-                if (data.id) {
-                    const { id, ...payload } = data;
-                    await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'students', id), payload);
-                } else {
-                    await addDoc(colRef, { ...data, createdAt: new Date().toISOString() });
-                }
-            } catch (e) {
-                console.error("Erro ao salvar:", e);
-            }
-        };
-
-        window.completeTraining = async (id) => {
-            if (!currentUser) return;
-            try {
-                await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'students', id));
-            } catch (e) {
-                console.error("Erro ao excluir:", e);
-            }
-        };
-
-        // Lógica de UI
-        const modal = document.getElementById('modal');
-        const studentForm = document.getElementById('studentForm');
-
-        document.getElementById('btnOpenModal').onclick = () => {
-            studentForm.reset();
-            document.getElementById('editId').value = '';
-            document.getElementById('modalTitle').innerText = 'Adicionar Aluno';
-            modal.classList.replace('hidden', 'flex');
-        };
-
-        document.getElementById('btnCloseModal').onclick = () => modal.classList.replace('flex', 'hidden');
-
-        studentForm.onsubmit = async (e) => {
+        document.getElementById('form-montar').onsubmit = async (e) => {
             e.preventDefault();
+            const id = document.getElementById('editId-montar').value;
             const data = {
-                id: document.getElementById('editId').value,
-                name: document.getElementById('name').value,
-                gym: document.getElementById('gym').value,
-                enrollment: document.getElementById('enrollment').value,
-                observations: document.getElementById('observations').value,
-                date: new Date().toLocaleDateString('pt-BR')
+                name: document.getElementById('name-montar').value,
+                gym: document.getElementById('gym-montar').value,
+                enrollment: document.getElementById('enrollment-montar').value,
+                observations: document.getElementById('obs-montar').value,
+                createdAt: new Date().toISOString()
             };
-            await window.saveStudent(data);
-            modal.classList.replace('flex', 'hidden');
+            const col = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'students');
+            id ? await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'students', id), data) : await addDoc(col, data);
+            closeModal('montar');
         };
 
-        window.editStudent = (id) => {
-            const s = students.find(i => i.id === id);
-            if(!s) return;
-            document.getElementById('editId').value = s.id;
-            document.getElementById('name').value = s.name;
-            document.getElementById('gym').value = s.gym;
-            document.getElementById('enrollment').value = s.enrollment;
-            document.getElementById('observations').value = s.observations;
-            document.getElementById('modalTitle').innerText = 'Editar Aluno';
-            modal.classList.replace('hidden', 'flex');
+        document.getElementById('form-dia').onsubmit = async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId-dia').value;
+            const data = {
+                studentName: document.getElementById('name-dia').value,
+                muscleGroup: document.getElementById('muscle-dia').value,
+                notes: document.getElementById('notes-dia').value,
+                createdAt: new Date().toISOString()
+            };
+            const col = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'daily_workouts');
+            id ? await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'daily_workouts', id), data) : await addDoc(col, data);
+            closeModal('dia');
         };
 
-        function render() {
+        window.deleteItem = async (type, id) => {
+            const colName = type === 'montar' ? 'students' : 'daily_workouts';
+            await deleteDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, colName, id));
+        };
+
+        window.editDia = (id) => {
+            const w = dailyWorkouts.find(i => i.id === id);
+            if(!w) return;
+            document.getElementById('editId-dia').value = w.id;
+            document.getElementById('name-dia').value = w.studentName;
+            document.getElementById('muscle-dia').value = w.muscleGroup;
+            document.getElementById('notes-dia').value = w.notes;
+            document.getElementById(`modal-dia`).classList.replace('hidden', 'flex');
+        };
+
+        function renderMontar() {
             const list = document.getElementById('studentList');
             list.innerHTML = '';
             document.getElementById('countPending').innerText = students.length;
-            
-            if (students.length === 0) {
-                document.getElementById('emptyState').classList.remove('hidden');
-            } else {
-                document.getElementById('emptyState').classList.add('hidden');
-                const sorted = [...students].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                
-                sorted.forEach(s => {
-                    const div = document.createElement('div');
-                    div.className = "bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center card-enter";
-                    div.innerHTML = `
-                        <div class="flex-1 pr-4">
-                            <div class="flex items-center gap-2">
-                                <h3 class="font-bold text-slate-800">${s.name}</h3>
-                                <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 uppercase">${s.gym}</span>
-                            </div>
-                            <p class="text-xs text-slate-500 mt-1 line-clamp-2">${s.observations || 'Sem observações.'}</p>
+            document.getElementById('emptyStateMontar').classList.toggle('hidden', students.length > 0);
+            students.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(s => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center card-enter";
+                div.innerHTML = `
+                    <div class="flex-1 overflow-hidden">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-slate-800 truncate">${s.name}</span>
+                            <span class="text-[9px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded uppercase font-bold shrink-0">${s.gym}</span>
                         </div>
-                        <div class="flex gap-1">
-                            <button onclick="editStudent('${s.id}')" class="p-2 text-slate-400 hover:text-blue-600 transition-colors">
+                        <p class="text-xs text-slate-500 mt-1 truncate">${s.observations || 'Sem notas.'}</p>
+                    </div>
+                    <button onclick="deleteItem('montar', '${s.id}')" class="text-slate-300 hover:text-green-500 p-2 shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function renderDia() {
+            const list = document.getElementById('dailyList');
+            list.innerHTML = '';
+            document.getElementById('emptyStateDia').classList.toggle('hidden', dailyWorkouts.length > 0);
+            dailyWorkouts.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(w => {
+                const div = document.createElement('div');
+                div.className = "bg-white p-5 rounded-2xl border border-slate-200 shadow-sm card-enter mb-4 overflow-hidden";
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-4 gap-2">
+                        <div class="overflow-hidden">
+                            <h3 class="text-xl font-bold text-slate-800 truncate">${w.studentName}</h3>
+                            <span class="inline-block bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase mt-1">Foco: ${w.muscleGroup}</span>
+                        </div>
+                        <div class="flex gap-1 shrink-0">
+                            <button onclick="editDia('${w.id}')" class="text-slate-400 hover:text-blue-500 p-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                             </button>
-                            <button onclick="completeTraining('${s.id}')" class="p-2 text-slate-400 hover:text-green-600 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <button onclick="deleteItem('dia', '${w.id}')" class="text-slate-300 hover:text-red-500 p-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
                         </div>
-                    `;
-                    list.appendChild(div);
-                });
-            }
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 leading-relaxed overflow-hidden">
+                        <div class="notes-area">${w.notes}</div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
         }
     </script>
 </body>
 </html>
+
