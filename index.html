@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Ferramentas - Sa˙de & Performance</title>
+    <title>Painel de Ferramentas - Sa√∫de & Performance</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -15,55 +15,85 @@
         .tool-card {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .tool-card:hover {
+        .tool-card:hover:not(.disabled) {
             transform: translateY(-5px);
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
         }
     </style>
 </head>
 <body class="flex items-center justify-center p-6">
 
-    <div class="max-w-4xl w-full">
+    <div class="max-w-5xl w-full">
         <!-- Header -->
         <header class="text-center mb-12">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Central de Trabalho</h1>
-            <p class="text-gray-600">Gest„o de lesıes e acompanhamento de hipertrofia</p>
+            <p class="text-gray-600">Gest√£o de les√µes e acompanhamento de hipertrofia</p>
         </header>
 
         <!-- Grid de Ferramentas -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            <!-- Link para o CronÙmetro -->
-            <a href="cronometro.html" class="tool-card group bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
-                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="Wait for DOM ready before starting game loop 12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <!-- Link para o Cron√¥metro -->
+            <a href="cronometro.html" class="tool-card group bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-3">CronÙmetro</h2>
-                <p class="text-gray-500 mb-6">Controle tempos de descanso, sÈries de reabilitaÁ„o e intervalos de alta intensidade.</p>
-                <span class="text-blue-600 font-semibold group-hover:underline">Acessar CronÙmetro &rarr;</span>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Cron√¥metro</h2>
+                <p class="text-sm text-gray-500 mb-4">Controle tempos de descanso e s√©ries de reabilita√ß√£o.</p>
+                <span class="text-blue-600 text-sm font-semibold group-hover:underline">Acessar &rarr;</span>
             </a>
 
-            <!-- Link para a AvaliaÁ„o -->
-            <a href="avaliacao.html" class="tool-card group bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
-                <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <!-- Link para a Avalia√ß√£o -->
+            <a href="avaliacao.html" class="tool-card group bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                <div class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-3">AvaliaÁ„o</h2>
-                <p class="text-gray-500 mb-6">Registre medidas, progresso de recuperaÁ„o e protocolos de hipertrofia dos seus alunos.</p>
-                <span class="text-emerald-600 font-semibold group-hover:underline">Iniciar AvaliaÁ„o &rarr;</span>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Avalia√ß√£o</h2>
+                <p class="text-sm text-gray-500 mb-4">Registre medidas e progresso de recupera√ß√£o dos alunos.</p>
+                <span class="text-emerald-600 text-sm font-semibold group-hover:underline">Acessar &rarr;</span>
             </a>
+
+            <!-- Treinos - √çcone de Haltere Atualizado -->
+            <a href="treinos.html" class="tool-card group bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                <div class="w-14 h-14 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mb-4 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                    <!-- SVG Haltere -->
+                    <svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 7.5V16.5M18 7.5V16.5M3 12H21M6 12H18M4.5 9H7.5M4.5 15H7.5M16.5 9H19.5M16.5 15H19.5" />
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Treinos</h2>
+                <p class="text-sm text-gray-500 mb-4">Espa√ßo para anota√ß√µes e montagem de protocolos de treinamento.</p>
+                <span class="text-orange-600 text-sm font-semibold group-hover:underline">Acessar &rarr;</span>
+            </a>
+
+            <!-- Bloco Em Breve -->
+            <div class="tool-card disabled bg-gray-50 p-6 rounded-2xl shadow-sm border border-dashed border-gray-300 flex flex-col items-center text-center">
+                <div class="w-14 h-14 bg-gray-200 text-gray-400 rounded-full flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-xl font-bold text-gray-400 mb-2">Em Breve</h2>
+                <p class="text-sm text-gray-400 mb-4">Novas funcionalidades est√£o sendo preparadas.</p>
+                <span class="text-gray-400 text-sm font-semibold italic">Aguarde novidades</span>
+            </div>
 
         </div>
 
-        <!-- RodapÈ/Info -->
+        <!-- Rodap√©/Info -->
         <footer class="mt-16 text-center text-gray-400 text-sm">
-            <p>&copy; 2026 Sistema de RecuperaÁ„o e Performance. Todos os arquivos devem estar na mesma pasta.</p>
+            <p>&copy; 2026 Sistema de Recupera√ß√£o e Performance. Todos os arquivos devem estar na mesma pasta.</p>
         </footer>
     </div>
 
 </body>
 </html>
+
