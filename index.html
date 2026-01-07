@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Ferramentas - Saúde & Performance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            min-height: 100vh;
+        }
+        .tool-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-6">
+
+    <div class="max-w-4xl w-full">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Central de Trabalho</h1>
+            <p class="text-gray-600">Gestão de lesões e acompanhamento de hipertrofia</p>
+        </header>
+
+        <!-- Grid de Ferramentas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Link para o Cronômetro -->
+            <a href="cronometro.html" class="tool-card group bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="Wait for DOM ready before starting game loop 12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-3">Cronômetro</h2>
+                <p class="text-gray-500 mb-6">Controle tempos de descanso, séries de reabilitação e intervalos de alta intensidade.</p>
+                <span class="text-blue-600 font-semibold group-hover:underline">Acessar Cronômetro &rarr;</span>
+            </a>
+
+            <!-- Link para a Avaliação -->
+            <a href="avaliacao.html" class="tool-card group bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-3">Avaliação</h2>
+                <p class="text-gray-500 mb-6">Registre medidas, progresso de recuperação e protocolos de hipertrofia dos seus alunos.</p>
+                <span class="text-emerald-600 font-semibold group-hover:underline">Iniciar Avaliação &rarr;</span>
+            </a>
+
+        </div>
+
+        <!-- Rodapé/Info -->
+        <footer class="mt-16 text-center text-gray-400 text-sm">
+            <p>&copy; 2026 Sistema de Recuperação e Performance. Todos os arquivos devem estar na mesma pasta.</p>
+        </footer>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Timer - Reabilitação & Hipertrofia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap');
+        
+        :root {
+            --bg-color: #020617;
+            --glass-bg: rgba(15, 23, 42, 0.8);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: #f8fafc;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .timer-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .glass-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .active-exercise {
+            box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .active-rest {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 10px;
+        }
+
+        .fade-inactive {
+            opacity: 0.25;
+            transform: scale(0.97);
+        }
+
+        .pulse-active {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .paused-overlay {
+            background: rgba(2, 6, 23, 0.6);
+            backdrop-filter: grayscale(1) blur(2px);
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="max-w-md w-full space-y-4">
+        
+        <!-- DASHBOARD DE MÉTRICAS GERAIS -->
+        <div class="glass-container rounded-2xl p-4 grid grid-cols-2 gap-3 relative overflow-hidden">
+            <div id="pausedLabel" class="absolute inset-0 flex items-center justify-center bg-red-600/10 text-red-500 font-bold text-[10px] uppercase tracking-[0.3em] hidden">
+                Sessão Pausada
+            </div>
+            <div class="stat-card">
+                <span class="text-[10px] text-slate-500 uppercase font-800 block mb-1">Duração Sessão</span>
+                <span id="totalSessionTimer" class="timer-font text-xl text-white">00:00:00</span>
+            </div>
+            <div class="stat-card border-l border-white/5">
+                <span class="text-[10px] text-green-500 uppercase font-800 block mb-1">Trabalho Total</span>
+                <span id="totalExerciseTimer" class="timer-font text-xl text-green-400">00:00:00</span>
+            </div>
+        </div>
+
+        <!-- RELÓGIO DE EXERCÍCIO -->
+        <div id="exerciseCard" class="glass-container rounded-[2.5rem] p-8 text-center relative overflow-hidden">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-slate-500 font-bold text-[11px] uppercase tracking-widest">Série Ativa</span>
+                <div id="exerciseInd" class="h-2.5 w-2.5 rounded-full bg-slate-800"></div>
+            </div>
+            <div id="exerciseTimer" class="timer-font text-7xl text-white tracking-tighter">00:00.00</div>
+            <div class="mt-4 text-[10px] text-slate-500 font-bold uppercase tracking-widest">Tempo de Tensão</div>
+        </div>
+
+        <!-- RELÓGIO DE DESCANSO -->
+        <div id="restCard" class="glass-container rounded-[2.5rem] p-8 text-center fade-inactive relative overflow-hidden">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-blue-500 font-bold text-[11px] uppercase tracking-widest">Recuperação</span>
+                <div id="restInd" class="h-2.5 w-2.5 rounded-full bg-slate-800"></div>
+            </div>
+            <div id="restTimer" class="timer-font text-7xl text-white tracking-tighter">00:00.00</div>
+            <div class="mt-4 text-[10px] text-slate-500 font-bold uppercase tracking-widest">Tempo de Intervalo</div>
+        </div>
+
+        <!-- CONTROLOS -->
+        <div class="flex flex-col gap-4 pt-4">
+            <button id="mainBtn" class="w-full bg-green-600 hover:bg-green-500 text-white font-900 py-6 rounded-[1.5rem] shadow-2xl transition-all active:scale-95 text-xl uppercase tracking-tighter">
+                Iniciar Treino
+            </button>
+            
+            <button id="stopResetBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold py-4 rounded-[1.2rem] text-xs uppercase tracking-[0.2em] transition-all border border-white/5">
+                Finalizar Treino
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Estados
+        let sessionStartTime = null;
+        let pausedAt = null;
+        let totalPausedTime = 0;
+        
+        let accumulatedExerciseTime = 0; 
+        let currentExerciseTime = 0;
+        let currentRestTime = 0;
+        let lastActionTimestamp = 0;
+
+        let clockInterval = null;
+        let isExercising = false;
+        let hasStarted = false;
+        let isPaused = false;
+
+        const els = {
+            totalSession: document.getElementById('totalSessionTimer'),
+            totalExercise: document.getElementById('totalExerciseTimer'),
+            exercise: document.getElementById('exerciseTimer'),
+            rest: document.getElementById('restTimer'),
+            mainBtn: document.getElementById('mainBtn'),
+            stopResetBtn: document.getElementById('stopResetBtn'),
+            exerciseCard: document.getElementById('exerciseCard'),
+            restCard: document.getElementById('restCard'),
+            exerciseInd: document.getElementById('exerciseInd'),
+            restInd: document.getElementById('restInd'),
+            pausedLabel: document.getElementById('pausedLabel')
+        };
+
+        function formatFull(ms) {
+            let s = Math.floor(ms / 1000);
+            let h = Math.floor(s / 3600);
+            let m = Math.floor((s % 3600) / 60);
+            s = s % 60;
+            return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function formatMilli(ms) {
+            let s = Math.floor(ms / 1000);
+            let m = Math.floor(s / 60);
+            s = s % 60;
+            let cs = Math.floor((ms % 1000) / 10);
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${cs.toString().padStart(2, '0')}`;
+        }
+
+        function refreshUI() {
+            if (isPaused) {
+                els.mainBtn.textContent = "Retomar Sessão";
+                els.mainBtn.className = "w-full bg-white text-black font-900 py-6 rounded-[1.5rem] shadow-2xl transition-all active:scale-95 text-xl uppercase tracking-tighter";
+                els.pausedLabel.classList.remove('hidden');
+                els.stopResetBtn.textContent = "Confirmar Reset Total";
+                els.stopResetBtn.classList.add('bg-red-900/40', 'text-red-400', 'border-red-500/30');
+                return;
+            }
+
+            els.pausedLabel.classList.add('hidden');
+            els.stopResetBtn.textContent = "Finalizar Treino";
+            els.stopResetBtn.classList.remove('bg-red-900/40', 'text-red-400', 'border-red-500/30');
+
+            if (isExercising) {
+                els.mainBtn.textContent = "Finalizar Série";
+                els.mainBtn.className = "w-full bg-yellow-600 hover:bg-yellow-500 text-white font-900 py-6 rounded-[1.5rem] shadow-2xl transition-all active:scale-95 text-xl uppercase tracking-tighter";
+                els.exerciseCard.classList.remove('fade-inactive');
+                els.exerciseCard.classList.add('active-exercise');
+                els.exerciseInd.className = "h-2.5 w-2.5 rounded-full bg-green-500 pulse-active";
+                els.restCard.classList.add('fade-inactive');
+                els.restCard.classList.remove('active-rest');
+                els.restInd.className = "h-2.5 w-2.5 rounded-full bg-slate-800";
+            } else {
+                els.mainBtn.textContent = hasStarted ? "Próxima Série" : "Iniciar Treino";
+                els.mainBtn.className = "w-full bg-blue-600 hover:bg-blue-500 text-white font-900 py-6 rounded-[1.5rem] shadow-2xl transition-all active:scale-95 text-xl uppercase tracking-tighter";
+                els.exerciseCard.classList.add('fade-inactive');
+                els.exerciseCard.classList.remove('active-exercise');
+                els.exerciseInd.className = "h-2.5 w-2.5 rounded-full bg-slate-800";
+                els.restCard.classList.remove('fade-inactive');
+                els.restCard.classList.add('active-rest');
+                els.restInd.className = "h-2.5 w-2.5 rounded-full bg-blue-500 pulse-active";
+            }
+        }
+
+        function updateClocks() {
+            if (isPaused) return;
+
+            const now = Date.now();
+            const sessionDuration = (now - sessionStartTime) - totalPausedTime;
+            els.totalSession.textContent = formatFull(sessionDuration);
+
+            if (isExercising) {
+                currentExerciseTime = now - lastActionTimestamp;
+                els.exercise.textContent = formatMilli(currentExerciseTime);
+                els.totalExercise.textContent = formatFull(accumulatedExerciseTime + currentExerciseTime);
+            } else {
+                currentRestTime = now - lastActionTimestamp;
+                els.rest.textContent = formatMilli(currentRestTime);
+            }
+        }
+
+        function handleMainAction() {
+            const now = Date.now();
+            
+            // Se estava pausado, retomar
+            if (isPaused) {
+                totalPausedTime += (now - pausedAt);
+                isPaused = false;
+                lastActionTimestamp = now - (isExercising ? currentExerciseTime : currentRestTime);
+                refreshUI();
+                return;
+            }
+
+            if (!hasStarted) {
+                sessionStartTime = now;
+                hasStarted = true;
+            }
+
+            if (!isExercising) {
+                isExercising = true;
+                currentExerciseTime = 0;
+                lastActionTimestamp = now;
+                els.rest.textContent = formatMilli(0);
+                if (!clockInterval) clockInterval = setInterval(updateClocks, 35);
+            } else {
+                accumulatedExerciseTime += currentExerciseTime;
+                isExercising = false;
+                currentRestTime = 0;
+                lastActionTimestamp = now;
+                els.exercise.textContent = formatMilli(0);
+            }
+            refreshUI();
+        }
+
+        function handleStopReset() {
+            if (!hasStarted) return;
+
+            if (!isPaused) {
+                // ETAPA 1: Pausar tudo
+                isPaused = true;
+                pausedAt = Date.now();
+                refreshUI();
+            } else {
+                // ETAPA 2: Reset Total
+                clearInterval(clockInterval);
+                clockInterval = null;
+                hasStarted = false;
+                isExercising = false;
+                isPaused = false;
+                sessionStartTime = null;
+                totalPausedTime = 0;
+                accumulatedExerciseTime = 0;
+                currentExerciseTime = 0;
+                currentRestTime = 0;
+
+                els.totalSession.textContent = "00:00:00";
+                els.totalExercise.textContent = "00:00:00";
+                els.exercise.textContent = "00:00.00";
+                els.rest.textContent = "00:00.00";
+                refreshUI();
+            }
+        }
+
+        els.mainBtn.addEventListener('click', handleMainAction);
+        els.stopResetBtn.addEventListener('click', handleStopReset);
+
+    </script>
+</body>
+</html>
