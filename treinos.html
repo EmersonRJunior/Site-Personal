@@ -2,16 +2,24 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gerenciador de Treinos - Recuperação & Hipertrofia</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuração de fontes com suporte a caracteres latinos para evitar erros de acentuação -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
         body { 
-            font-family: 'Inter', sans-serif; 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             background-color: #f8fafc; 
-            overflow-x: hidden; /* Evita scroll horizontal durante o swipe */
-            touch-action: pan-y; /* Permite scroll vertical mas gerenciaremos o horizontal */
+            overflow-x: hidden; 
+            touch-action: pan-y;
+            -webkit-font-smoothing: antialiased;
         }
         
         .card-enter { animation: slideIn 0.3s ease-out; }
@@ -40,7 +48,6 @@
             border-color: #10b981; 
         }
 
-        /* Transição suave entre abas */
         .tab-content {
             transition: opacity 0.2s ease-in-out;
         }
@@ -57,6 +64,8 @@
                     <h1 class="text-3xl font-bold text-slate-800">Sistema de Treinos</h1>
                     <div id="connStatus" class="text-[10px] font-mono mt-1 px-2 py-0.5 rounded bg-slate-100 inline-block uppercase tracking-wider text-slate-500">Conectando...</div>
                 </div>
+                <!-- Link de Voltar para a Index -->
+                <a href="index.html" class="text-xs font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest">Painel Principal</a>
             </div>
             <nav class="flex gap-8">
                 <button onclick="switchTab('montar')" id="tab-montar" class="pb-3 font-semibold text-slate-500 hover:text-slate-700 transition-all tab-active">Treinos a Montar</button>
@@ -187,24 +196,18 @@
         let touchendX = 0;
 
         function handleGesture() {
-            const threshold = 70; // Sensibilidade do deslize
+            const threshold = 70;
             if (touchendX < touchstartX - threshold) {
-                // Deslizou para a esquerda -> Aba Treino do Dia
                 if (currentActiveTab === 'montar') switchTab('dia');
             }
             if (touchendX > touchstartX + threshold) {
-                // Deslizou para a direita -> Aba Treinos a Montar
                 if (currentActiveTab === 'dia') switchTab('montar');
             }
         }
 
-        document.addEventListener('touchstart', e => {
-            touchstartX = e.changedTouches[0].screenX;
-        }, false);
-
-        document.addEventListener('touchend', e => {
+        document.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, false);
+        document.addEventListener('touchend', e => { 
             touchendX = e.changedTouches[0].screenX;
-            // Só ativa o swipe se não houver um modal aberto
             const isModalOpen = !document.getElementById('modal-montar').classList.contains('hidden') || 
                                 !document.getElementById('modal-dia').classList.contains('hidden');
             if (!isModalOpen) handleGesture();
@@ -212,17 +215,14 @@
 
         window.switchTab = (tab) => {
             if (currentActiveTab === tab) return;
-            
             const container = document.getElementById('tab-container');
             container.classList.add('fade-out');
-
             setTimeout(() => {
                 currentActiveTab = tab;
                 document.getElementById('content-montar').classList.toggle('hidden', tab !== 'montar');
                 document.getElementById('content-dia').classList.toggle('hidden', tab !== 'dia');
                 document.getElementById('tab-montar').classList.toggle('tab-active', tab === 'montar');
                 document.getElementById('tab-dia').classList.toggle('tab-active', tab === 'dia');
-                
                 container.classList.remove('fade-out');
                 container.classList.add('fade-in');
             }, 150);
@@ -293,9 +293,7 @@
 
         window.clearContent = async (e, id) => {
             e.stopPropagation();
-            await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'daily_workouts', id), {
-                notes: ""
-            });
+            await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'daily_workouts', id), { notes: "" });
         };
 
         window.confirmDelete = async (e, type, id) => {
@@ -341,7 +339,7 @@
                         </div>
                         <p class="text-xs text-slate-500 mt-1 truncate">${s.observations || '<span class="italic opacity-50">Sem notas clínicas...</span>'}</p>
                     </div>
-                    <button onclick="confirmDelete(event, 'montar', '${s.id}')" class="text-slate-300 hover:text-green-500 p-2 shrink-0 transition-colors" title="Concluir/Remover">
+                    <button onclick="confirmDelete(event, 'montar', '${s.id}')" class="text-slate-300 hover:text-green-500 p-2 shrink-0 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                     </button>
                 `;
@@ -364,7 +362,7 @@
                             <span class="inline-block bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase mt-1">Foco: ${w.muscleGroup}</span>
                         </div>
                         <div class="flex gap-2 shrink-0">
-                            <button onclick="clearContent(event, '${w.id}')" class="text-slate-400 hover:text-amber-500 p-1 transition-colors" title="Limpar notas">
+                            <button onclick="clearContent(event, '${w.id}')" class="text-slate-400 hover:text-amber-500 p-1 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                             </button>
                             <button onclick="confirmDelete(event, 'dia', '${w.id}')" class="text-slate-300 hover:text-red-500 p-1 transition-colors">
