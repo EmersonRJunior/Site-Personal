@@ -1,59 +1,51 @@
 <!DOCTYPE html>
-<html lang="pt-pt">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Timer - ReabilitaÁ„o & Hipertrofia</title>
+    <title>Cron√¥metro de Performance - Emerson</title>
+    
+    <!-- Configura√ß√£o de fontes com suporte a caracteres latinos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap');
-        
-        :root {
-            --bg-color: #020617;
-            --glass-bg: rgba(15, 23, 42, 0.8);
-        }
-
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: #f8fafc;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
-
+        
         .timer-font {
             font-family: 'JetBrains Mono', monospace;
         }
 
-        .glass-container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        .tool-card {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
         }
 
         .active-exercise {
-            box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
-            border: 1px solid rgba(34, 197, 94, 0.4);
+            border: 2px solid #10b981; /* green-500 */
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.1);
         }
 
         .active-rest {
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
-            border: 1px solid rgba(59, 130, 246, 0.4);
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
-            padding: 10px;
+            border: 2px solid #3b82f6; /* blue-500 */
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1);
         }
 
         .fade-inactive {
-            opacity: 0.25;
-            transform: scale(0.97);
+            opacity: 0.5;
+            transform: scale(0.98);
         }
 
         .pulse-active {
@@ -62,73 +54,74 @@
 
         @keyframes pulse {
             0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.2); }
+            50% { opacity: 0.6; transform: scale(1.1); }
             100% { opacity: 1; transform: scale(1); }
-        }
-
-        .paused-overlay {
-            background: rgba(2, 6, 23, 0.6);
-            backdrop-filter: grayscale(1) blur(2px);
         }
     </style>
 </head>
-<body class="p-4">
+<body class="flex items-center justify-center p-4">
 
     <div class="max-w-md w-full space-y-4">
         
-        <!-- DASHBOARD DE M…TRICAS GERAIS -->
-        <div class="glass-container rounded-2xl p-4 grid grid-cols-2 gap-3 relative overflow-hidden">
-            <div id="pausedLabel" class="absolute inset-0 flex items-center justify-center bg-red-600/10 text-red-500 font-bold text-[10px] uppercase tracking-[0.3em] hidden">
-                Sess„o Pausada
+        <!-- Bot√£o Voltar -->
+        <a href="index.html" class="inline-flex items-center text-gray-500 hover:text-gray-800 transition-colors text-sm font-semibold mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            Voltar ao Painel
+        </a>
+
+        <!-- DASHBOARD DE M√âTRICAS -->
+        <div class="tool-card p-4 grid grid-cols-2 gap-4 relative overflow-hidden">
+            <div id="pausedLabel" class="absolute inset-0 flex items-center justify-center bg-red-50 text-red-600 font-bold text-[10px] uppercase tracking-widest hidden z-20">
+                Sess√£o Pausada
             </div>
-            <div class="stat-card">
-                <span class="text-[10px] text-slate-500 uppercase font-800 block mb-1">DuraÁ„o Sess„o</span>
-                <span id="totalSessionTimer" class="timer-font text-xl text-white">00:00:00</span>
+            <div class="p-2">
+                <span class="text-[10px] text-gray-400 uppercase font-extrabold block mb-1">Dura√ß√£o Total</span>
+                <span id="totalSessionTimer" class="timer-font text-xl text-gray-800">00:00:00</span>
             </div>
-            <div class="stat-card border-l border-white/5">
-                <span class="text-[10px] text-green-500 uppercase font-800 block mb-1">Trabalho Total</span>
-                <span id="totalExerciseTimer" class="timer-font text-xl text-green-400">00:00:00</span>
+            <div class="p-2 border-l border-gray-100">
+                <span class="text-[10px] text-green-600 uppercase font-extrabold block mb-1">Trabalho Efetivo</span>
+                <span id="totalExerciseTimer" class="timer-font text-xl text-green-600">00:00:00</span>
             </div>
         </div>
 
-        <!-- REL”GIO DE EXERCÕCIO -->
-        <div id="exerciseCard" class="glass-container rounded-[2.5rem] p-8 text-center relative overflow-hidden">
+        <!-- REL√ìGIO DE EXERC√çCIO -->
+        <div id="exerciseCard" class="tool-card p-8 text-center relative overflow-hidden">
             <div class="flex justify-between items-center mb-4">
-                <span class="text-slate-500 font-bold text-[11px] uppercase tracking-widest">SÈrie Ativa</span>
-                <div id="exerciseInd" class="h-2.5 w-2.5 rounded-full bg-slate-800"></div>
+                <span class="text-gray-400 font-bold text-[11px] uppercase tracking-widest">Tempo de Tens√£o</span>
+                <div id="exerciseInd" class="h-3 w-3 rounded-full bg-gray-200"></div>
             </div>
-            <div id="exerciseTimer" class="timer-font text-7xl text-white tracking-tighter">00:00.00</div>
-            <div class="mt-4 text-[10px] text-slate-500 font-bold uppercase tracking-widest">Tempo de Tens„o</div>
+            <div id="exerciseTimer" class="timer-font text-6xl text-gray-900 tracking-tighter">00:00.00</div>
+            <div class="mt-4 text-[10px] text-gray-400 font-bold uppercase">Foco na Execu√ß√£o</div>
         </div>
 
-        <!-- REL”GIO DE DESCANSO -->
-        <div id="restCard" class="glass-container rounded-[2.5rem] p-8 text-center fade-inactive relative overflow-hidden">
+        <!-- REL√ìGIO DE DESCANSO -->
+        <div id="restCard" class="tool-card p-8 text-center fade-inactive relative overflow-hidden">
             <div class="flex justify-between items-center mb-4">
-                <span class="text-blue-500 font-bold text-[11px] uppercase tracking-widest">RecuperaÁ„o</span>
-                <div id="restInd" class="h-2.5 w-2.5 rounded-full bg-slate-800"></div>
+                <span class="text-blue-500 font-bold text-[11px] uppercase tracking-widest">Recupera√ß√£o</span>
+                <div id="restInd" class="h-3 w-3 rounded-full bg-gray-200"></div>
             </div>
-            <div id="restTimer" class="timer-font text-7xl text-white tracking-tighter">00:00.00</div>
-            <div class="mt-4 text-[10px] text-slate-500 font-bold uppercase tracking-widest">Tempo de Intervalo</div>
+            <div id="restTimer" class="timer-font text-6xl text-gray-900 tracking-tighter">00:00.00</div>
+            <div class="mt-4 text-[10px] text-gray-400 font-bold uppercase">Intervalo entre S√©ries</div>
         </div>
 
-        <!-- CONTROLOS -->
-        <div class="flex flex-col gap-4 pt-4">
-            <button id="mainBtn" class="w-full bg-green-600 hover:bg-green-500 text-white font-900 py-6 rounded-[1.5rem] shadow-2xl transition-all active:scale-95 text-xl uppercase tracking-tighter">
+        <!-- CONTROLES -->
+        <div class="flex flex-col gap-4 pt-2">
+            <button id="mainBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-5 rounded-2xl shadow-lg transition-all active:scale-95 text-lg uppercase">
                 Iniciar Treino
             </button>
             
-            <button id="stopResetBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-400 font-bold py-4 rounded-[1.2rem] text-xs uppercase tracking-[0.2em] transition-all border border-white/5">
-                Finalizar Treino
+            <button id="stopResetBtn" class="w-full bg-white text-gray-400 font-bold py-3 rounded-xl text-[10px] uppercase tracking-[0.2em] transition-all border border-gray-200 hover:bg-gray-50">
+                Finalizar e Resetar
             </button>
         </div>
     </div>
 
     <script>
-        // Estados
         let sessionStartTime = null;
         let pausedAt = null;
         let totalPausedTime = 0;
-        
         let accumulatedExerciseTime = 0; 
         let currentExerciseTime = 0;
         let currentRestTime = 0;
@@ -171,46 +164,44 @@
 
         function refreshUI() {
             if (isPaused) {
-                els.mainBtn.textContent = "Retomar Sess„o";
-                els.mainBtn.className = "w-full bg-white text-black font-900 py-6 rounded-[1.5rem] shadow-2xl transition-all active:scale-95 text-xl uppercase tracking-tighter";
+                els.mainBtn.textContent = "Retomar Sess√£o";
+                els.mainBtn.className = "w-full bg-gray-900 text-white font-extrabold py-5 rounded-2xl shadow-lg transition-all active:scale-95 text-lg uppercase";
                 els.pausedLabel.classList.remove('hidden');
-                els.stopResetBtn.textContent = "Confirmar Reset Total";
-                els.stopResetBtn.classList.add('bg-red-900/40', 'text-red-400', 'border-red-500/30');
+                els.stopResetBtn.textContent = "Confirmar Reset";
+                els.stopResetBtn.classList.add('text-red-500', 'border-red-100', 'bg-red-50');
                 return;
             }
 
             els.pausedLabel.classList.add('hidden');
-            els.stopResetBtn.textContent = "Finalizar Treino";
-            els.stopResetBtn.classList.remove('bg-red-900/40', 'text-red-400', 'border-red-500/30');
+            els.stopResetBtn.textContent = "Finalizar e Resetar";
+            els.stopResetBtn.classList.remove('text-red-500', 'border-red-100', 'bg-red-50');
 
             if (isExercising) {
-                els.mainBtn.textContent = "Finalizar SÈrie";
-                els.mainBtn.className = "w-full bg-yellow-600 hover:bg-yellow-500 text-white font-900 py-6 rounded-[1.5rem] shadow-2xl transition-all active:scale-95 text-xl uppercase tracking-tighter";
+                els.mainBtn.textContent = "Finalizar S√©rie";
+                els.mainBtn.className = "w-full bg-orange-500 hover:bg-orange-600 text-white font-extrabold py-5 rounded-2xl shadow-lg transition-all active:scale-95 text-lg uppercase";
                 els.exerciseCard.classList.remove('fade-inactive');
                 els.exerciseCard.classList.add('active-exercise');
-                els.exerciseInd.className = "h-2.5 w-2.5 rounded-full bg-green-500 pulse-active";
+                els.exerciseInd.className = "h-3 w-3 rounded-full bg-green-500 pulse-active";
                 els.restCard.classList.add('fade-inactive');
                 els.restCard.classList.remove('active-rest');
-                els.restInd.className = "h-2.5 w-2.5 rounded-full bg-slate-800";
+                els.restInd.className = "h-3 w-3 rounded-full bg-gray-200";
             } else {
-                els.mainBtn.textContent = hasStarted ? "PrÛxima SÈrie" : "Iniciar Treino";
-                els.mainBtn.className = "w-full bg-blue-600 hover:bg-blue-500 text-white font-900 py-6 rounded-[1.5rem] shadow-2xl transition-all active:scale-95 text-xl uppercase tracking-tighter";
+                els.mainBtn.textContent = hasStarted ? "Pr√≥xima S√©rie" : "Iniciar Treino";
+                els.mainBtn.className = "w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-5 rounded-2xl shadow-lg transition-all active:scale-95 text-lg uppercase";
                 els.exerciseCard.classList.add('fade-inactive');
                 els.exerciseCard.classList.remove('active-exercise');
-                els.exerciseInd.className = "h-2.5 w-2.5 rounded-full bg-slate-800";
+                els.exerciseInd.className = "h-3 w-3 rounded-full bg-gray-200";
                 els.restCard.classList.remove('fade-inactive');
                 els.restCard.classList.add('active-rest');
-                els.restInd.className = "h-2.5 w-2.5 rounded-full bg-blue-500 pulse-active";
+                els.restInd.className = "h-3 w-3 rounded-full bg-blue-500 pulse-active";
             }
         }
 
         function updateClocks() {
             if (isPaused) return;
-
             const now = Date.now();
             const sessionDuration = (now - sessionStartTime) - totalPausedTime;
             els.totalSession.textContent = formatFull(sessionDuration);
-
             if (isExercising) {
                 currentExerciseTime = now - lastActionTimestamp;
                 els.exercise.textContent = formatMilli(currentExerciseTime);
@@ -223,8 +214,6 @@
 
         function handleMainAction() {
             const now = Date.now();
-            
-            // Se estava pausado, retomar
             if (isPaused) {
                 totalPausedTime += (now - pausedAt);
                 isPaused = false;
@@ -232,12 +221,10 @@
                 refreshUI();
                 return;
             }
-
             if (!hasStarted) {
                 sessionStartTime = now;
                 hasStarted = true;
             }
-
             if (!isExercising) {
                 isExercising = true;
                 currentExerciseTime = 0;
@@ -256,14 +243,11 @@
 
         function handleStopReset() {
             if (!hasStarted) return;
-
             if (!isPaused) {
-                // ETAPA 1: Pausar tudo
                 isPaused = true;
                 pausedAt = Date.now();
                 refreshUI();
             } else {
-                // ETAPA 2: Reset Total
                 clearInterval(clockInterval);
                 clockInterval = null;
                 hasStarted = false;
@@ -274,7 +258,6 @@
                 accumulatedExerciseTime = 0;
                 currentExerciseTime = 0;
                 currentRestTime = 0;
-
                 els.totalSession.textContent = "00:00:00";
                 els.totalExercise.textContent = "00:00:00";
                 els.exercise.textContent = "00:00.00";
@@ -285,7 +268,7 @@
 
         els.mainBtn.addEventListener('click', handleMainAction);
         els.stopResetBtn.addEventListener('click', handleStopReset);
-
     </script>
 </body>
 </html>
+
