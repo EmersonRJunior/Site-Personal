@@ -2,15 +2,25 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Ferramentas - Saúde & Performance</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuração de fontes com suporte a caracteres latinos -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
         body {
-            font-family: 'Inter', sans-serif;
+            /* Fallback de fontes robusto para evitar erro de caracteres */
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         .tool-card {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -30,7 +40,7 @@
     <div class="max-w-5xl w-full">
         <!-- Header -->
         <header class="text-center mb-12">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Central de Trabalho</h1>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-2 tracking-tight">Central de Trabalho</h1>
             <p class="text-gray-600">Gestão de lesões e acompanhamento de hipertrofia</p>
         </header>
 
@@ -61,7 +71,7 @@
                 <span class="text-emerald-600 text-sm font-semibold group-hover:underline">Acessar &rarr;</span>
             </a>
 
-            <!-- Treinos - Ícone de Haltere Atualizado -->
+            <!-- Treinos -->
             <a href="treinos.html" class="tool-card group bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
                 <div class="w-14 h-14 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mb-4 group-hover:bg-orange-600 group-hover:text-white transition-colors">
                     <!-- SVG Haltere -->
@@ -90,7 +100,7 @@
 
         <!-- Rodapé/Info -->
         <footer class="mt-16 text-center text-gray-400 text-sm">
-            <p>&copy; 2026 Sistema de Recuperação e Performance. Todos os arquivos devem estar na mesma pasta.</p>
+            <p>&copy; 2026 Sistema de Recuperação e Performance.</p>
         </footer>
     </div>
 
